@@ -1,5 +1,7 @@
 # The Anatomy of a Search Engine
 
+Yaaay search engine bitches
+
 The repository contains a gradle applications project template for completing Assignment number 2.
 
 ### Project Structure
