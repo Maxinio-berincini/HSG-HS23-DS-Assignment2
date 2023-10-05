@@ -1,146 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hypermedia Environment</title>
-</head>
-<body>
-<div class="search-container">
-    <div class="logo-container">
-        DS Search
-    </div>
-    <form id="search-form" action="/search" method="get">
-        <div class="search-fields">
-            <input type="text" name="q" id="search-bar" class="home-search" autofocus="autofocus" autocapitalize="none" spellcheck="false" autocorrect="off" autocomplete="off" dir="auto">
-            <input type="submit" id="search-submit" value="Search">
-        </div>
-    </form>
-</div>
-</body>
-<style>
-    /* Colors */
-    :root {
-        /*LIGHTTHEMECOLORS*/
-        --whoogle-logo: #685e79;
-        --whoogle-page-bg: #fff;
-        --whoogle-element-bg: #4285f4;
-        --whoogle-text: #000;
-        --whoogle-contrast-text: #fff;
-        --whoogle-secondary-text: #70757a;
-        --whoogle-result-bg: #fff;
-        --whoogle-result-title: #1967d2;
-        --whoogle-result-url: #0d652d;
-        --whoogle-result-visited: #4b11a8;
-        /*DARKTHEMECOLORS*/
-        --whoogle-dark-logo: #685e79;
-        --whoogle-dark-page-bg: #101020;
-        --whoogle-dark-element-bg: #4285f4;
-        --whoogle-dark-text: #fff;
-        --whoogle-dark-contrast-text: #fff;
-        --whoogle-dark-secondary-text: #bbb;
-        --whoogle-dark-result-bg: #212131;
-        --whoogle-dark-result-title: #64a7f6;
-        --whoogle-dark-result-url: #34a853;
-        --whoogle-dark-result-visited: #bbf
-    }
+    <style>
+        /* Colors */
+        :root {
+            /* Light Theme Colors */
+            --whoogle-logo: #685e79;
+            --whoogle-page-bg: #fff;
+            --whoogle-element-bg: #4285f4;
+            --whoogle-text: #000;
+            --whoogle-contrast-text: #fff;
+            --whoogle-secondary-text: #70757a;
+            --whoogle-result-bg: #fff;
+            --whoogle-result-title: #1967d2;
+            --whoogle-result-url: #0d652d;
+            --whoogle-result-visited: #4b11a8;
 
-    body {
-        max-width: 80% !important
-    }
-
-    @media (max-width: 1000px) {
-        svg {
-            margin-top: .3em;
-            height: 70%;
+            /* Dark Theme Colors */
+            --whoogle-dark-logo: #685e79;
+            --whoogle-dark-page-bg: #101020;
+            --whoogle-dark-element-bg: #4285f4;
+            --whoogle-dark-text: #fff;
+            --whoogle-dark-contrast-text: #fff;
+            --whoogle-dark-secondary-text: #bbb;
+            --whoogle-dark-result-bg: #212131;
+            --whoogle-dark-result-title: #64a7f6;
+            --whoogle-dark-result-url: #34a853;
+            --whoogle-dark-result-visited: #bbf;
         }
-    }
-    html {
-        background: var(--whoogle-dark-page-bg) !important;
-    }
 
-    body {
-        background: var(--whoogle-dark-page-bg) !important;
-    }
+        body, html {
+            background: var(--whoogle-dark-page-bg);
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            max-width: 80%;
+            margin: 0 auto;
+        }
 
-    div {
-        color: var(--whoogle-dark-text) !important;
-    }
+        div, li {
+            color: var(--whoogle-dark-text);
+        }
 
-    li {
-        color: var(--whoogle-dark-text) !important;
-    }
+        .search-container {
+            width: 80%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 600px;
+        }
 
-    input {
-        background-color: var(--whoogle-dark-page-bg) !important;
-        color: var(--whoogle-dark-text) !important;
-    }
+        .logo-container {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--whoogle-dark-logo);
+        }
 
-    #search-bar {
-        border-color: var(--whoogle-dark-element-bg) !important;
-        color: var(--whoogle-dark-text) !important;
-        background-color: var(--whoogle-dark-result-bg) !important;
-        border: 2px solid var(--whoogle-dark-element-bg);
-    }
+        .search-fields input {
+            background-color: var(--whoogle-dark-result-bg);
+            border: 2px solid var(--whoogle-dark-element-bg);
+            color: var(--whoogle-dark-text);
+            height: 40px;
+            font-size: 24px;
+            border-radius: 10px 10px 0 0;
+            width: 100%;
+            outline: none;
+            box-sizing: border-box;
+        }
 
-    #search-bar:focus {
-        color: var(--whoogle-dark-text) !important;
-    }
+        .search-buttons input:hover {
+            background: var(--whoogle-dark-element-bg);
+        }
 
-    #search-submit {
-        border: 1px solid var(--whoogle-dark-element-bg) !important;
-        background: var(--whoogle-dark-element-bg) !important;
-        color: var(--whoogle-dark-contrast-text) !important;
-    }
+        .search-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
 
-    body {
-        font-family: Avenir, Helvetica, Arial, sans-serif;
-    }
+        .search-buttons input[type="submit"] {
+            width: 50%;
+            text-align: center;
+            cursor: pointer;
+            font-size: 20px;
+            height: 40px;
+            color: var(--whoogle-dark-contrast-text);
+        }
 
-    .search-container {
-        background: transparent !important;
-        width: 80%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        max-width: 600px;
-        z-index: 15;
-    }
+        #search-submit {
+            border-right: 2px solid;
+            border-radius: 0 0 0 5px;
+        }
 
-    .logo-container {
-        max-height: 500px;
-        text-align: center;
-        font-size: 32px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        color: var(--whoogle-dark-logo);
-    }
+        #lucky-submit {
+            border-left: 2px solid;
+            border-radius: 0 0 5px 0;
+        }
 
-    #search-bar {
-        background: transparent !important;
-        width: 100%;
-        height: 40px;
-        outline: none;
-        font-size: 24px;
-        border-radius: 10px 10px 0 0;
-        background: rgba(0, 0, 0, 0);
-        -moz-box-sizing: border-box;
-        -webkit-box-sizing: border-box;
-        -ms-box-sizing: border-box;
-        box-sizing: border-box;
-    }
+        @media (max-width: 1000px) {
+            svg {
+                margin-top: .3em;
+                height: 70%;
+            }
+        }
+    </style>
+</head>
 
-    #search-submit {
-        width: 100%;
-        height: 40px;
-        text-align: center;
-        cursor: pointer;
-        font-size: 20px;
-        align-content: center;
-        align-items: center;
-        margin: auto;
-        border-radius: 0 0 10px 10px;
-        max-width: 600px;
-        -webkit-appearance: none;
-    }
-</style>
+<body>
+    <div class="search-container">
+        <div class="logo-container">
+            DS Search
+        </div>
+        <form id="search-form" action="/search" method="get">
+            <div class="search-fields">
+                <input type="text" name="q" id="search-bar" class="home-search" autofocus autocapitalize="none" spellcheck="false" autocorrect="off" autocomplete="off" dir="auto">
+                <div class="search-buttons">
+                    <input type="submit" id="search-submit" value="Search">
+                    <input type="submit" id="lucky-submit" value="I'm Feeling Lucky" formaction="/lucky">
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
 </html>
