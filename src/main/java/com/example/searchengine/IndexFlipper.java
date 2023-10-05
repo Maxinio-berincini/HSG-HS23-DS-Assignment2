@@ -49,7 +49,7 @@ public class IndexFlipper {
 
     }
 
-    private static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
+    public static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
         return set.stream()
                 .filter(array -> array.length > 0 && array[0].equals(element))
                 .findFirst();

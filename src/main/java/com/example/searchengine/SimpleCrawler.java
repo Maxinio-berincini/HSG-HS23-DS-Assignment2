@@ -18,7 +18,6 @@ public class SimpleCrawler extends Crawler {
 
     public void crawl(String startUrl){
         try {
-            int duration = 0;
             long startTime = System.nanoTime();
             Set<String[]> lines = explore(startUrl, new HashSet<>(), new HashSet<>());
             FileWriter fileWriter = new FileWriter(indexFileName);
@@ -28,7 +27,7 @@ public class SimpleCrawler extends Crawler {
             }
             writer.close();
             long endTime = System.nanoTime();
-            duration = (int) ((endTime - startTime)/1000000000);
+            int duration = (int) ((endTime - startTime)/1000000000);
             System.out.println("duration simple crawler: "+duration + "s");
         } catch (Exception e){
             e.printStackTrace();

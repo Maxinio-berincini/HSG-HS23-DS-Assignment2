@@ -1,6 +1,7 @@
 package com.example.searchengine;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -10,6 +11,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -30,6 +35,7 @@ public class SearchEngine {
 	@Autowired
 	IndexFlipper indexFlipper;
 
+	@Qualifier("searchEngineProperties")
 	@Autowired
 	SearchEngineProperties properties;
 
@@ -46,6 +52,20 @@ public class SearchEngine {
 			crawler.crawl(startUrl);
 			indexFlipper.flipIndex(indexFileName, flippedIndexFileName);
 		}
+	}
+
+	@GetMapping("/")
+	public String index() {
+		try {
+			return Files.readString(Path.of("./src/main/resources/static/index.html"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@GetMapping("/search")
+	public List<String> search(@RequestParam(name = "q") String q, @RequestHeader Map<String,String> allHeaders) {
+		return searcher.search(q, flippedIndexFileName);
 	}
 
 }
