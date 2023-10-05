@@ -68,4 +68,16 @@ public class SearchEngine {
 		return searcher.search(q, flippedIndexFileName);
 	}
 
+	@GetMapping("/lucky")
+	public String lucky(@RequestParam(name = "q") String q) {
+		// get first result and redirect
+		List<String> urls = searcher.search(q, flippedIndexFileName);
+		if (urls.size() > 0) {
+			return "<a href=" + urls.get(0) + ">" + urls.get(0) + "</a>";
+		} else {
+			return "Not Found";
+		}
+
+	}
+
 }

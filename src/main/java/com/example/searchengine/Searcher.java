@@ -35,8 +35,8 @@ public class Searcher {
             e.printStackTrace();
         }
         long endTime = System.nanoTime();
-        int duration = (int) ((endTime - startTime)/1000000000);
-        System.out.println("duration searcher flipped: "+duration);
+        int duration = (int) ((endTime - startTime)/1000000);
+        System.out.println("duration searcher flipped: "+duration + "ms");
         return urls;
     }
 
