@@ -64,65 +64,24 @@ public class SearchEngine {
 	}
 
 	@GetMapping("/search")
-	public String search(@RequestParam(name = "q") String q, @RequestHeader Map<String,String> allHeaders) {
-		List<String> results = searcher.search(q, flippedIndexFileName);
+public String search(@RequestParam(name = "q", required = false) String q,
+                     @RequestHeader Map<String, String> allHeaders,
+                     HttpServletResponse response) {
+
+    // Check if q is empty or null, then redirect to /
+    if (q == null || q.trim().isEmpty()) {
+        response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+        response.setHeader("Location", "/");
+        return null;
+    }
+
+	List<String> results = searcher.search(q, flippedIndexFileName);
 		Map<String, List<String>> keywordsByUrl = loadKeywordsFromIndex();
 
 		StringBuilder html = new StringBuilder();
-		html.append("<!DOCTYPE html><html><head><title>Search Results</title>");
-		html.append("<style>")
-			.append("/* Colors */" +
-					":root {" +
-					"/*LIGHTTHEMECOLORS*/" +
-					"--whoogle-logo: #685e79;" +
-					"--whoogle-page-bg: #fff;" +
-					"--whoogle-element-bg: #4285f4;" +
-					"--whoogle-text: #000;" +
-					"--whoogle-contrast-text: #fff;" +
-					"--whoogle-secondary-text: #70757a;" +
-					"--whoogle-result-bg: #fff;" +
-					"--whoogle-result-title: #1967d2;" +
-					"--whoogle-result-url: #0d652d;" +
-					"--whoogle-result-visited: #4b11a8;" +
-					"/*DARKTHEMECOLORS*/" +
-					"--whoogle-dark-logo: #685e79;" +
-					"--whoogle-dark-page-bg: #101020;" +
-					"--whoogle-dark-element-bg: #4285f4;" +
-					"--whoogle-dark-text: #fff;" +
-					"--whoogle-dark-contrast-text: #fff;" +
-					"--whoogle-dark-secondary-text: #bbb;" +
-					"--whoogle-dark-result-bg: #212131;" +
-					"--whoogle-dark-result-title: #64a7f6;" +
-					"--whoogle-dark-result-url: #34a853;" +
-					"--whoogle-dark-result-visited: #bbf" +
-					"}")
-			.append("body {background: var(--whoogle-dark-page-bg) !important;}")
-			.append(".search-results {")
-			.append("max-width: 80%;")
-			.append("display: block !important;")
-			.append("margin: auto !important;")
-		   .append(".search-result-item {")
-		   .append("font-size: 14px;")
-		   .append("line-height: 22px;")
-		   .append("overflow: hidden;")
-		   .append("box-shadow: 0 0 0 0 !important;")
-		   .append("background-color: var(--whoogle-dark-result-bg) !important;")
-		   .append("margin-bottom: 10px !important;")
-		   .append("border-radius: 8px !important;")
-		   .append("padding: 12px 16px 12px;")
-		   .append("color: var(--whoogle-dark-text) !important;")
-		   .append("}")
-		   .append(".link {")
-		   .append("text-decoration: none;")
-		   .append("}")
-		   .append(".link p {")
-		   .append("color: var(--whoogle-dark-result-url) !important;")
-		   .append("}")
-		   .append(".content p {")
-		   .append("color: var(--whoogle-dark-text) !important;")
-		   .append("}")
-		   .append("</style>");
-		html.append("</head><body>");
+		html.append(getHTMLHeader());
+		html.append("<body>");
+		html.append(getSearchBar(q));
 
 		Function<String, String> boldKeyword = (text) -> {
 			String boldedKeyword = "<strong>" + q + "</strong>";
@@ -130,27 +89,127 @@ public class SearchEngine {
 		};
 
 		html.append("<div class='search-results'>");
-
 		for (String url : results) {
 			String lastBitOfUrl = url.substring(url.lastIndexOf('/'));
 			List<String> keywords = keywordsByUrl.getOrDefault(lastBitOfUrl, Collections.emptyList());
-
-			html.append("<div class='search-result-item'>")
-				.append("<div class='link'>")
-				.append("<a href='").append(url).append("' target='_blank'>")
-				.append("<h3>").append(lastBitOfUrl).append("</h3>")
-				.append("<p>").append(url).append("</p>")
-				.append("</a>")
-				.append("</div>")
-				.append("<div class='content'>")
-				.append("<p>").append(boldKeyword.apply(String.join(", ", keywords))).append("</p>")
-				.append("</div>")
-				.append("</div>");
+			html.append(getResultItem(url, lastBitOfUrl, boldKeyword.apply(String.join(", ", keywords))));
 		}
 
 		html.append("</div></body></html>");
-
 		return html.toString();
+	}
+
+	private String getHTMLHeader() {
+		// Ideally move this CSS to a separate file, or use a templating engine.
+		return "<!DOCTYPE html><html><head><title>Search Results</title><style>" +
+			   "/* Colors */" +
+				"    :root {" +
+				"      /*LIGHTTHEMECOLORS*/" +
+				"      --whoogle-logo: #685e79;" +
+				"      --whoogle-page-bg: #fff;" +
+				"      --whoogle-element-bg: #4285f4;" +
+				"      --whoogle-text: #000;" +
+				"      --whoogle-contrast-text: #fff;" +
+				"      --whoogle-secondary-text: #70757a;" +
+				"      --whoogle-result-bg: #fff;" +
+				"      --whoogle-result-title: #1967d2;" +
+				"      --whoogle-result-url: #0d652d;" +
+				"      --whoogle-result-visited: #4b11a8;" +
+				"      /*DARKTHEMECOLORS*/" +
+				"      --whoogle-dark-logo: #685e79;" +
+				"      --whoogle-dark-page-bg: #101020;" +
+				"      --whoogle-dark-element-bg: #4285f4;" +
+				"      --whoogle-dark-text: #fff;" +
+				"      --whoogle-dark-contrast-text: #fff;" +
+				"      --whoogle-dark-secondary-text: #bbb;" +
+				"      --whoogle-dark-result-bg: #212131;" +
+				"      --whoogle-dark-result-title: #64a7f6;" +
+				"      --whoogle-dark-result-url: #34a853;" +
+				"      --whoogle-dark-result-visited: #bbf" +
+				"    }" +
+				"    body {" +
+				"      background: var(--whoogle-dark-page-bg) !important;" +
+				"      font-family: arial, sans-serif;" +
+				"      min-width: 652px;" +
+				"    }" +
+				"    .search-div {" +
+				"      border-radius: 8px 8px 8px 8px;" +
+				"      box-shadow: 0 1px 6px rgba(32, 33, 36, 0.18);" +
+				"      margin-top: 10px;" +
+				"      max-width: 80%;" +
+				"      margin: auto;" +
+				"      margin-bottom: 15px;" +
+				"    }" +
+				"    #search-form {" +
+				"      height: 39px;" +
+				"      display: flex;" +
+				"      width: 100%;" +
+				"      margin: 0px;" +
+				"    }" +
+				"    #search-bar {" +
+				"      background: transparent !important;" +
+				"      border-color: var(--whoogle-dark-element-bg) !important;" +
+				"      color: var(--whoogle-dark-text) !important;" +
+				"      background-color: var(--whoogle-dark-result-bg) !important;" +
+				"      padding-right: 50px;" +
+				"      padding-left: 8px;" +
+				"      border: none;" +
+				"      border-radius: 8px 8px 8px 8px;" +
+				"      height: 40px !important;" +
+				"      display: block;" +
+				"      width: 100%;" +
+				"      font-family: Roboto,HelveticaNeue,Arial,sans-serif;" +
+				"      font-size: 14px;" +
+				"      line-height: 20px;" +
+				"    }" +
+				"    #search-bar:focus {" +
+				"      border-bottom: 2px solid var(--whoogle-dark-element-bg);" +
+				"      outline: none;" +
+				"    }" +
+				"    .search-results {" +
+				"      max-width: 80%;" +
+				"      display: block !important;" +
+				"      margin: auto !important;" +
+				"      .search-result-item {" +
+				"        font-size: 14px;" +
+				"        overflow: hidden;" +
+				"        box-shadow: 0 0 0 0 !important;" +
+				"        background-color: var(--whoogle-dark-result-bg) !important;" +
+				"        margin-bottom: 10px !important;" +
+				"        border-radius: 8px !important;" +
+				"        padding: 12px 16px 12px;" +
+				"        color: var(--whoogle-dark-text) !important;" +
+				"      }" +
+				"      .link {" +
+				"        text-decoration: none;" +
+				"      }" +
+				"      .link p {" +
+				"        color: var(--whoogle-dark-result-url) !important;" +
+				"      }" +
+				"      .content p {" +
+				"        color: var(--whoogle-dark-text) !important;" +
+				"      }" +
+			   "</style></head>";
+	}
+
+	private String getSearchBar(String q) {
+		return "<div class=\"search-div\"><form id=\"search-form\" method=\"GET\">" +
+			   "<input id=\"search-bar\" autocomplete=\"off\" class=\"search-bar-input\" name=\"q\" type=\"text\" value=\"" + q + "\">" +
+			   "</form></div>";
+	}
+
+	private String getResultItem(String url, String lastBitOfUrl, String keywords) {
+		return "<div class='search-result-item'>" +
+			   "<div class='link'>" +
+			   "<a href='" + url + "' target='_blank'>" +
+			   "<h3>" + lastBitOfUrl + "</h3>" +
+			   "<p>" + url + "</p>" +
+			   "</a>" +
+			   "</div>" +
+			   "<div class='content'>" +
+			   "<p>" + keywords + "</p>" +
+			   "</div>" +
+			   "</div>";
 	}
 
 	private Map<String, List<String>> loadKeywordsFromIndex() {
@@ -177,7 +236,6 @@ public class SearchEngine {
 			response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 			response.setHeader("Location", urls.get(0));
 		} else {
-			// Optional: You can handle the case when no URLs are found here.
 			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
 			try {
 				response.getWriter().write("Not Found");
