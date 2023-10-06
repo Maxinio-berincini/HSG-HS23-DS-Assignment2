@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -69,15 +70,20 @@ public class SearchEngine {
 	}
 
 	@GetMapping("/lucky")
-	public String lucky(@RequestParam(name = "q") String q) {
+	public void lucky(@RequestParam(name = "q") String q, HttpServletResponse response) {
 		// get first result and redirect
 		List<String> urls = searcher.search(q, flippedIndexFileName);
 		if (urls.size() > 0) {
-			return "<a href=" + urls.get(0) + ">" + urls.get(0) + "</a>";
+			response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+			response.setHeader("Location", urls.get(0));
 		} else {
-			return "Not Found";
+			// Optional: You can handle the case when no URLs are found here.
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+			try {
+				response.getWriter().write("Not Found");
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
-
 	}
-
 }
