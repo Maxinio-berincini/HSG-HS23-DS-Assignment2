@@ -1,110 +1,82 @@
 package com.example.searchengine;
 
 import com.opencsv.CSVWriter;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
-import java.io.*;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.FileWriter;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
 
 public class SimpleCrawler extends Crawler {
 
+    private static final String BASE_URL = "https://api.interactions.ics.unisg.ch/hypermedia-environment/";
 
     protected SimpleCrawler(String indexFileName) {
         super(indexFileName);
     }
 
-    public void crawl(String startUrl){
+    public void crawl(String startUrl) {
         try {
             long startTime = System.nanoTime();
             Set<String[]> lines = explore(startUrl, new HashSet<>(), new HashSet<>());
-            FileWriter fileWriter = new FileWriter(indexFileName);
-            CSVWriter writer = new CSVWriter(fileWriter,',', CSVWriter.NO_QUOTE_CHARACTER,' ',"\r\n");
-            for (String[] line : lines) {
-                writer.writeNext(line);
+            try (FileWriter fileWriter = new FileWriter(indexFileName);
+                 CSVWriter writer = new CSVWriter(fileWriter, ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n")) {
+                for (String[] line : lines) {
+                    writer.writeNext(line);
+                }
             }
-            writer.close();
             long endTime = System.nanoTime();
-            int duration = (int) ((endTime - startTime)/1000000000);
-            System.out.println("duration simple crawler: "+duration + "s");
-        } catch (Exception e){
+            int duration = (int) ((endTime - startTime) / 1000000000);
+            System.out.println("duration simple crawler: " + duration + "s");
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
 
-    private String getHTML(String url) {
-        String content = "";
-        System.out.println(url);
+    private Document getHTML(String url) {
         try {
-            URLConnection connection =  new URL(url).openConnection();
-            Scanner scanner = new Scanner(connection.getInputStream());
-            scanner.useDelimiter("\\Z");
-            content = scanner.next();
-            scanner.close();
-        }catch ( Exception ex ) {
-            ex.printStackTrace();
+            return Jsoup.connect(url).get();
+        } catch (Exception ex) {
+            System.out.println("Error while reading url: " + url);
+            return null;
         }
-        return content;
     }
 
-    /**
-     *
-     * @param startUrl the url where the crawling operation starts
-     * @param lines stores the lines to print on the index file
-     * @param visited stores the urls that the program has already visited
-     * @return the set of lines to print on the index file
-     */
-    public Set<String[]> explore(String startUrl, Set<String[]> lines, Set<String> visited){
-        if (visited.contains(startUrl)) return lines;
-        visited.add(startUrl);
-        String html = getHTML(startUrl);
-        // count number of <p> tags
-        List<String> pTags = new ArrayList<>();
-        Pattern p = Pattern.compile("<p>(.*?)</p>", Pattern.DOTALL);
-        Matcher m = p.matcher(html);
-        while (m.find()){
-            pTags.add(m.group(1).trim());
-        }
+    public Set<String[]> explore(String startUrl, Set<String[]> lines, Set<String> visited) {
+        Queue<String> queue = new LinkedList<>();
+        queue.add(startUrl);
 
-        String[] line = new String[pTags.size() + 1];
-        // only get the last part of the url
-        line[0] = startUrl.substring(startUrl.lastIndexOf("/"));
+        while (!queue.isEmpty()) {
+            String currentUrl = queue.poll();
 
-        for (int i = 0; i < pTags.size(); i++) {
-            line[i+1] = pTags.get(i);
-        }
+            if (visited.contains(currentUrl)) continue;
+            visited.add(currentUrl);
 
-        // System.out.println(Arrays.toString(line));
+            Document doc = getHTML(currentUrl);
+            if (doc == null) continue;
 
-        lines.add(line);
+            Elements pTags = doc.select("p");
+            String[] line = new String[pTags.size() + 1];
+            line[0] = currentUrl.substring(currentUrl.lastIndexOf("/"));
+            int index = 1;
+            for (Element p : pTags) {
+                line[index++] = p.text();
+            }
+            lines.add(line);
 
-        // find all the links in the page. Example <a href="609ada9fcd0d4297">609ada9fcd0d4297</a>
-        p = Pattern.compile("<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1", Pattern.DOTALL);
-        m = p.matcher(html);
-        while (m.find()){
-            String link = m.group(2);
-
-            if (!link.startsWith("http"))
-                link = startUrl.substring(0, startUrl.lastIndexOf("/")) + "/" + link;
-
-            if (link.contains("https://api.interactions.ics.unisg.ch/hypermedia-environment/") == false)
-                continue;
-
-            if (link.startsWith("http")) {
-                // explore link and merge the result with lines
-                Set<String[]> newLines = explore(link, lines, visited);
-                // merge lines and newLines, but avoid duplicates
-                Set<String[]> mergedLines = new HashSet<>();
-                mergedLines.addAll(lines);
-                mergedLines.addAll(newLines);
-                lines = mergedLines;
+            Elements links = doc.select("a[href]");
+            for (Element link : links) {
+                String absLink = link.attr("abs:href");
+                if (absLink.startsWith(BASE_URL) && !visited.contains(absLink))
+                    queue.add(absLink);
             }
         }
 
         return lines;
     }
-
 }
