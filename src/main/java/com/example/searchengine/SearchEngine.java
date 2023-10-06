@@ -65,8 +65,25 @@ public class SearchEngine {
 	}
 
 	@GetMapping("/search")
-	public List<String> search(@RequestParam(name = "q") String q, @RequestHeader Map<String,String> allHeaders) {
-		return searcher.search(q, flippedIndexFileName);
+	public String search(@RequestParam(name = "q") String q, @RequestHeader Map<String,String> allHeaders) {
+		List<String> results = searcher.search(q, flippedIndexFileName);
+
+		StringBuilder html = new StringBuilder();
+		html.append("<!DOCTYPE html><html><head><title>Search Results</title></head><body>");
+		html.append("<h2>Search results for: ").append(q).append("</h2>");
+
+		if (results.isEmpty()) {
+			html.append("<p>No results found.</p>");
+		} else {
+			html.append("<ul>");
+			for (String url : results) {
+				html.append("<li><a href='").append(url).append("'>").append(url).append("</a></li>");
+			}
+			html.append("</ul>");
+		}
+		html.append("</body></html>");
+
+		return html.toString();
 	}
 
 	@GetMapping("/lucky")
