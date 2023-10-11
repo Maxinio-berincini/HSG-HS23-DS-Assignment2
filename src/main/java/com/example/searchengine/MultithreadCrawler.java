@@ -15,45 +15,32 @@ import java.util.concurrent.*;
 
 public class MultithreadCrawler extends Crawler {
 
-    private ThreadPoolTaskExecutor executorService;
     private static final String BASE_URL = "https://api.interactions.ics.unisg.ch/hypermedia-environment/";
-
-
-    private CopyOnWriteArraySet<String> visited;
-
-    private CopyOnWriteArraySet<String[]> lines;
-
-
-    private ObserveRunnable observeRunnable;
-
-    private boolean done = false;
+    private final ThreadPoolTaskExecutor executorService;
+    private final CopyOnWriteArraySet<String> visited;
+    private final CopyOnWriteArraySet<String[]> lines;
 
     public MultithreadCrawler(String indexFileName) {
-        //TODO: initialize
         super(indexFileName);
+
         int numThreads = Runtime.getRuntime().availableProcessors();
         executorService = new ThreadPoolTaskExecutor();
         executorService.setCorePoolSize(numThreads);
         executorService.initialize();
 
-
         visited = new CopyOnWriteArraySet<>();
         lines = new CopyOnWriteArraySet<>();
-
     }
 
     public void crawl(String startUrl) {
-        double startTime = System.currentTimeMillis();
+        double startTime = System.nanoTime();
         executorService.submit(new CrawlerRunnable(this, startUrl));
-// TODO wait for the crawler to finish
-        while (!done) {
+
+        while (executorService.getActiveCount() > 0) {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            if (executorService.getActiveCount() == 0) {
-                done = true;
             }
         }
 
@@ -68,12 +55,19 @@ public class MultithreadCrawler extends Crawler {
             e.printStackTrace();
         }
 
+        executorService.shutdown();
 
-        //TODO: complete
+        try (FileWriter fileWriter = new FileWriter(indexFileName); CSVWriter writer = new CSVWriter(fileWriter, ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n")) {
+            for (String[] line : lines) {
+                writer.writeNext(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         long endTime = System.nanoTime();
         int duration = (int) ((endTime - startTime) / 1000000000);
-        System.out.println("duration multithread crawler: " + duration + "s");
-
+        System.out.println("Duration multithread crawler: " + duration + "s");
     }
 
     class CrawlerRunnable implements Runnable {
@@ -115,25 +109,10 @@ public class MultithreadCrawler extends Crawler {
                 for (Element link : links) {
                     String absLink = link.attr("abs:href");
                     if (absLink.startsWith(BASE_URL) && !visited.contains(absLink))
-                        executorService.submit(new CrawlerRunnable(crawler, absLink));
+                        crawler.executorService.submit(new CrawlerRunnable(crawler, absLink));
                 }
             }
 
-        }
-    }
-
-    // redundant code
-    class ObserveRunnable implements Runnable {
-        private MultithreadCrawler crawler;
-
-
-        public ObserveRunnable(MultithreadCrawler crawler) {
-            this.crawler = crawler;
-        }
-
-        @Override
-        public void run() {
-            //TODO: complete
         }
     }
 }
