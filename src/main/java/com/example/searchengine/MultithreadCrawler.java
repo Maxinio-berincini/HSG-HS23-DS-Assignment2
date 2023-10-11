@@ -43,7 +43,7 @@ public class MultithreadCrawler extends Crawler {
     }
 
     public void crawl(String startUrl) {
-        double startTime = System.currentTimeMillis();
+        double startTime = System.nanoTime();
         executorService.submit(new CrawlerRunnable(this, startUrl));
 // TODO wait for the crawler to finish
         while (!done) {
