@@ -45,6 +45,7 @@ public class IndexFlipper {
             for (String[] line : lines) {
                 writer.writeNext(line);
             }
+            writer.close();
 
         } catch (Exception e){
             e.printStackTrace();
