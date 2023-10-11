@@ -54,12 +54,7 @@ public class IndexFlipper {
     }
 
     public static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
-        for (String[] array : set) {
-            if (array[0].equals(element)) {
-                return Optional.of(array);
-            }
-        }
-        return Optional.empty();
+        return set.stream().filter(array -> array[0].equals(element)).findFirst();
     }
 
 }
