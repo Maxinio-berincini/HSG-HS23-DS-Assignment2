@@ -33,6 +33,9 @@ public class IndexFlipper {
                         String[] newLine = new String[2];
                         newLine[0] = line[i];
                         newLine[1] = link;
+                        if(newLine[0] == "dvds") {
+                            System.out.println("found");
+                        }
                         lines.add(newLine);
                     }
                 }
@@ -50,9 +53,12 @@ public class IndexFlipper {
     }
 
     public static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
-        return set.stream()
-                .filter(array -> array.length > 0 && array[0].equals(element))
-                .findFirst();
+        for (String[] array : set) {
+            if (array[0].equals(element)) {
+                return Optional.of(array);
+            }
+        }
+        return Optional.empty();
     }
 
 }
