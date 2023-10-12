@@ -10,7 +10,7 @@ public abstract class TestBase {
 
     public final String flippedIndexFileName = "./src/main/resources/index_flipped.csv";
 
-    public static final String startUrl = "https://api.interactions.ics.unisg.ch/hypermedia-environment/cc2247b79ac48af0";
+    public  final String startUrl = "https://api.interactions.ics.unisg.ch/hypermedia-environment/cc2247b79ac48af0";
 
 
     public Set<String> createSet(String... values){

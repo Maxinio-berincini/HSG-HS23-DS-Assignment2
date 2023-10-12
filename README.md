@@ -54,7 +54,7 @@ On Linux:
 
 ```
 
-On MacOS:
+On macOS:
 
 ```bash
 ./gradlew test --tests "SimpleCrawlerTest"
@@ -80,10 +80,11 @@ On Linux:
 ./gradlew test --tests "SearcherTestTest"
 ```
 
-On MacOS:
+On macOS:
 
 ```bash
-./gradlew test --tests "SimpleCrawlerTest"
+./gradlew test --tests "IndexFlipperTest"
+./gradlew test --tests "SearcherTestTest"
 
 ```
 
@@ -91,7 +92,8 @@ On MacOS:
 On Windows:
 
 ```bash
-.\gradlew test --tests "SimpleCrawlerTest"
+.\gradlew test --tests "IndexFlipperTest"
+.\gradlew test --tests "SearcherTestTest"
 ```
 
 
@@ -118,7 +120,7 @@ On Linux:
 
 ```
 
-On MacOS:
+On macOS:
 
 ```bash
 ./gradlew bootRun
@@ -148,7 +150,7 @@ On Linux:
 
 ```
 
-On MacOS:
+On macOS:
 
 ```bash
 ./gradlew test --tests "MultithreadCrawlerTest"

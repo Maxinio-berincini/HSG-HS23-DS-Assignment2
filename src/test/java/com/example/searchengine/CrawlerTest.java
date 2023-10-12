@@ -19,12 +19,11 @@ public abstract class CrawlerTest extends TestBase{
     public void crawl(){
         Crawler c = generateCrawler();
         c.crawl(startUrl);
-        System.out.println("crawling done in test class");
 
     }
 
     @Test
-    public void testCrawl(){
+    public void testCrawl1(){
         try {
             System.out.println("test crawl");
             CSVReader csvReader = new CSVReader(new FileReader(indexFileName));
@@ -44,6 +43,54 @@ public abstract class CrawlerTest extends TestBase{
             fail();
         }
     }
+
+    @Test
+    public void testCrawl2(){
+        try {
+            System.out.println("test crawl");
+            CSVReader csvReader = new CSVReader(new FileReader(indexFileName));
+            List<String[]> lines = csvReader.readAll();
+            boolean hasUrl1bd38608b1a6cf7e = false;
+            for (String[] line: lines){
+                boolean b = testUrl(line,"/1bd38608b1a6cf7e", createSet("verzeichnis", "mark", "camera"));
+
+                if (b){
+                    hasUrl1bd38608b1a6cf7e = true;
+                }
+
+            }
+            if ( !hasUrl1bd38608b1a6cf7e){
+                fail();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            fail();
+        }
+    }
+    @Test
+    public void testCrawl3(){
+        try {
+            System.out.println("test crawl");
+            CSVReader csvReader = new CSVReader(new FileReader(indexFileName));
+            List<String[]> lines = csvReader.readAll();
+            boolean hasUrl68b088f800b95e8c = false;
+            for (String[] line: lines){
+                boolean b = testUrl(line,"/68b088f800b95e8c", createSet("mouse", "cherrybot", "sixth"));
+
+                if (b){
+                    hasUrl68b088f800b95e8c = true;
+                }
+
+            }
+            if ( !hasUrl68b088f800b95e8c){
+                fail();
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            fail();
+        }
+    }
+
 
     public boolean testUrl(String[] line, String url, Set<String> values){
         boolean b = false;
