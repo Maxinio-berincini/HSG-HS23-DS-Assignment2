@@ -103,17 +103,23 @@ public String search(@RequestParam(name = "q", required = false) String q,
 
 	private String getAdminButtons() {
 		return "<div class='admin-buttons'>" +
+				"<h2>Admin Interface</h2>" +
+				"<div class='form-fields'>" +
 				"<label for='adminUrl'>URL:</label>" +
 				"<input type='text' id='adminUrl' name='adminUrl'>" +
 				"<label for='adminKeywords'>Keywords (comma separated):</label>" +
 				"<input type='text' id='adminKeywords' name='adminKeywords'>" +
+				"</div>" +
+				"<div class='action-buttons'>" +
 				"<button onclick=\"adminAction('admin/crawl')\">Start Crawl</button>" +
 				"<button onclick=\"adminAction('admin/regenerate-flipped-index')\">Regenerate Flipped Index</button>" +
 				"<button onclick=\"adminAction('admin/delete-url')\">Delete URL</button>" +
 				"<button onclick=\"adminAction('admin/update-url')\">Update URL</button>" +
-				"<button onclick=\"loadKeywordsForUrl()\">Load URL</button>" +
+				"<button onclick=\"loadKeywordsForUrl()\">Load Keywords from URL</button>" +
 				"</div>" +
-				"<script src='scripts.js'></script>";
+				"</div>";
+
+
 	}
 
 
