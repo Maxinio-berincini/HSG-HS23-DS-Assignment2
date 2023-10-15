@@ -1,4 +1,4 @@
-Assignment 1
+Assignment 2
 ------------
 
 # Team Members
@@ -14,7 +14,7 @@ Assignment 1
 
 1. Indicate the time necessary for the SimpleCrawler to work.
 
-Ans:
+> Ans: The SimpleCrawler took 57 seconds on one of our machines.
 
 
 
@@ -22,7 +22,12 @@ Ans:
 
 1. Is the flipped index smaller or larger than the initial index? What does this depend on?
 
-Ans:
+> Ans: 
+> 
+> The flipped index is larger, because it has the keywords as keys and the urls as values.
+> As all the urls have multiple keywords, the number of keywords is larger than the number of urls.
+> And because the number of repeating keywords is not that high, the number of unique keywords is much larger than the number of urls.
+> So the size of the flipped index depends on the number of keywords per url and the number of unique keywords.
 
 # Task 3
 
@@ -50,10 +55,15 @@ Ans:
 
 1.  Indicate the time necessary for the MultithreadCrawler to work.
 
-Ans:
+> Ans: 
+> 
+> The MultithreadCrawler took 5 seconds on one of our machines.
 
-3. Indicate the ratio of the time for the SimpleCrawler divided by the time for the MultithreadedCrawler to get the increase in speed.
+2. Indicate the ratio of the time for the SimpleCrawler divided by the time for the MultithreadedCrawler to get the increase in speed.
 
-Ans:
+> Ans: 
+> 
+> 57s / 5s = 11.4, this means that the MultithreadCrawler is 11.4 times faster than the SimpleCrawler.
+
 
 
