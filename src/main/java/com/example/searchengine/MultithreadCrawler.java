@@ -44,8 +44,6 @@ public class MultithreadCrawler extends Crawler {
             }
         }
 
-        executorService.shutdown();
-
         // Save lines to file (similar to the simple crawler)
         try (FileWriter fileWriter = new FileWriter(indexFileName); CSVWriter writer = new CSVWriter(fileWriter, ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n")) {
             for (String[] line : lines) {
@@ -56,14 +54,6 @@ public class MultithreadCrawler extends Crawler {
         }
 
         executorService.shutdown();
-
-        try (FileWriter fileWriter = new FileWriter(indexFileName); CSVWriter writer = new CSVWriter(fileWriter, ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n")) {
-            for (String[] line : lines) {
-                writer.writeNext(line);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         long endTime = System.nanoTime();
         int duration = (int) ((endTime - startTime) / 1000000000);
@@ -79,7 +69,6 @@ public class MultithreadCrawler extends Crawler {
         public CrawlerRunnable(MultithreadCrawler crawler, String startUrl) {
             this.crawler = crawler;
             this.startUrl = startUrl;
-
         }
 
         private Document getHTML(String url) {
@@ -108,11 +97,14 @@ public class MultithreadCrawler extends Crawler {
                 Elements links = doc.select("a[href]");
                 for (Element link : links) {
                     String absLink = link.attr("abs:href");
-                    if (absLink.startsWith(BASE_URL) && !visited.contains(absLink))
-                        crawler.executorService.submit(new CrawlerRunnable(crawler, absLink));
+                    synchronized (visited) {
+                        if (absLink.startsWith(BASE_URL) && !visited.contains(absLink)) {
+                            visited.add(absLink);
+                            crawler.executorService.submit(new CrawlerRunnable(crawler, absLink));
+                        }
+                    }
                 }
             }
-
         }
     }
 }
