@@ -6,13 +6,18 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class Crawler {
 
      final String indexFileName;
+    private Path path;
 
     private String baseUrl = "https://api.interactions.ics.unisg.ch/hypermedia-environment/";
 
@@ -22,6 +27,7 @@ public abstract class Crawler {
      */
     protected Crawler(String indexFileName) {
         this.indexFileName = indexFileName;
+        this.path = Path.of(indexFileName);
     }
 
     /**
@@ -46,4 +52,64 @@ public abstract class Crawler {
         returnList.add(hyperlinks);
         return returnList;
     }
+
+    public void deleteUrlFromIndex(String urlToDelete) {
+
+        List<String> updatedLines = new ArrayList<>();
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (String line : lines) {
+                if (!line.startsWith(urlToDelete + ",")) {
+                    updatedLines.add(line);
+                }
+            }
+            Files.write(path, updatedLines);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateUrlInIndex(String urlToUpdate, List<String> newKeywords) {
+        List<String> updatedLines = new ArrayList<>();
+        boolean updated = false;
+
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (String line : lines) {
+                if (line.startsWith(urlToUpdate + ",")) {
+                    updatedLines.add(urlToUpdate + "," + String.join(",", newKeywords));
+                    updated = true;
+                } else {
+                    updatedLines.add(line);
+                }
+            }
+
+            if (!updated) {
+                updatedLines.add(urlToUpdate + "," + String.join(",", newKeywords));
+            }
+
+            Files.write(path, updatedLines);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<String> getKeywordsForUrl(String urlToFind) {
+        try {
+            List<String> lines = Files.readAllLines(path);
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                String url = parts[0];
+                if (url.equals(urlToFind)) {
+                    return Arrays.asList(parts).subList(1, parts.length);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+
+
 }

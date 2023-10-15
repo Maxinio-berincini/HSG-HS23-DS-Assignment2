@@ -5,10 +5,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
@@ -57,11 +56,14 @@ public class SearchEngine {
 	@GetMapping("/")
 	public String index() {
 		try {
-			return Files.readString(Path.of("./src/main/resources/static/index.html"));
+			String content = Files.readString(Path.of("./src/main/resources/static/index.html"));
+			String adminButtons = getAdminButtons();
+			return content + adminButtons;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
 
 	@GetMapping("/search")
 public String search(@RequestParam(name = "q", required = false) String q,
@@ -98,6 +100,44 @@ public String search(@RequestParam(name = "q", required = false) String q,
 		html.append("</div></body></html>");
 		return html.toString();
 	}
+
+	private String getAdminButtons() {
+		return "<div class='admin-buttons'>" +
+				"<label for='adminUrl'>URL:</label>" +
+				"<input type='text' id='adminUrl' name='adminUrl'>" +
+				"<label for='adminKeywords'>Keywords (comma separated):</label>" +
+				"<input type='text' id='adminKeywords' name='adminKeywords'>" +
+				"<button onclick=\"adminAction('admin/crawl')\">Start Crawl</button>" +
+				"<button onclick=\"adminAction('admin/regenerate-flipped-index')\">Regenerate Flipped Index</button>" +
+				"<button onclick=\"adminAction('admin/delete-url')\">Delete URL</button>" +
+				"<button onclick=\"adminAction('admin/update-url')\">Update URL</button>" +
+				"<button onclick=\"loadKeywordsForUrl()\">Load URL</button>" +
+				"</div>" +
+				"<script>" +
+				"function adminAction(endpoint) {" +
+				"    const url = document.getElementById('adminUrl').value;" +
+				"    const keywords = document.getElementById('adminKeywords').value;" +
+				"    const formData = new FormData();" +
+				"    formData.append('url', url);" +
+				"    if(keywords) formData.append('keywords', keywords);" +
+				"    fetch(endpoint, {" +
+				"        method: 'POST'," +
+				"        body: formData" +
+				"    }).then(response => response.text()).then(alert);" +
+				"}" +
+				"function loadKeywordsForUrl() {" +
+				"    const url = document.getElementById('adminUrl').value;" +
+				"    fetch('admin/load-keywords?url=' + encodeURIComponent(url))" +
+				"        .then(response => response.text())" +
+				"        .then(keywords => {" +
+				"            document.getElementById('adminKeywords').value = keywords;" +
+				"        });" +
+				"}" +
+				"</script>";
+	}
+
+
+
 
 	private String getHTMLHeader() {
 		// Ideally move this CSS to a separate file, or use a templating engine.
@@ -244,4 +284,41 @@ public String search(@RequestParam(name = "q", required = false) String q,
 			}
 		}
 	}
+
+	@PostMapping("/admin/crawl")
+	public ResponseEntity<String> startCrawl() {
+		crawler.crawl(startUrl);
+		return new ResponseEntity<>("Crawling finished successfully", HttpStatus.OK);
+	}
+
+	@PostMapping("/admin/regenerate-flipped-index")
+	public ResponseEntity<String> regenerateFlippedIndex() {
+		indexFlipper.flipIndex(indexFileName, flippedIndexFileName);
+		return new ResponseEntity<>("Flipped index regenerated successfully", HttpStatus.OK);
+	}
+
+	@PostMapping("/admin/delete-url")
+	public ResponseEntity<String> deleteUrl(@RequestParam String url) {
+		crawler.deleteUrlFromIndex(url);
+		return new ResponseEntity<>("URL deleted successfully", HttpStatus.OK);
+	}
+
+
+	@PostMapping("/admin/update-url")
+	public ResponseEntity<String> updateUrl(@RequestParam String url, @RequestParam String keywords) {
+		List<String> keywordList = Arrays.asList(keywords.split(","));
+		crawler.updateUrlInIndex(url, keywordList);
+		return new ResponseEntity<>("URL updated successfully", HttpStatus.OK);
+	}
+
+	@GetMapping("/admin/load-keywords")
+	public ResponseEntity<String> loadKeywordsForUrl(@RequestParam String url) {
+		List<String> keywords = crawler.getKeywordsForUrl(url);
+		if (keywords != null) {
+			return new ResponseEntity<>(String.join(",", keywords), HttpStatus.OK);
+		} else {
+			return new ResponseEntity<>("URL not found", HttpStatus.NOT_FOUND);
+		}
+	}
+
 }
