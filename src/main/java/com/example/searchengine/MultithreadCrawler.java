@@ -90,11 +90,7 @@ public class MultithreadCrawler extends Crawler {
                 line[0] = startUrl.substring(startUrl.lastIndexOf("/"));
                 int index = 1;
                 for (Element p : pTags) {
-                    if (p.children().isEmpty()) {
-                        line[index++] = p.text();
-                    } else {
-                        line[index++] = p.html();
-                    }
+                    line[index++] = p.text();
                 }
 
                 lines.add(line);
