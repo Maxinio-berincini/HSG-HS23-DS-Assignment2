@@ -63,7 +63,7 @@ public class SimpleCrawler extends Crawler {
         String html = getHTML(startUrl);
         // count number of <p> tags
         List<String> pTags = new ArrayList<>();
-        Pattern p = Pattern.compile("<p>(.*?)</p>", Pattern.DOTALL);
+        Pattern p = Pattern.compile("<p>((?:<a href.*?</a>)|.*?)</p>", Pattern.DOTALL);
         Matcher m = p.matcher(html);
         while (m.find()){
             pTags.add(m.group(1).trim());

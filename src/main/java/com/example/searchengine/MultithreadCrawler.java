@@ -90,8 +90,13 @@ public class MultithreadCrawler extends Crawler {
                 line[0] = startUrl.substring(startUrl.lastIndexOf("/"));
                 int index = 1;
                 for (Element p : pTags) {
-                    line[index++] = p.text();
+                    if (p.children().isEmpty()) {
+                        line[index++] = p.text();
+                    } else {
+                        line[index++] = p.html();
+                    }
                 }
+
                 lines.add(line);
 
                 Elements links = doc.select("a[href]");
