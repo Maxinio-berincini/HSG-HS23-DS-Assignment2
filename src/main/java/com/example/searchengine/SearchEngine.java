@@ -186,8 +186,18 @@ public String search(@RequestParam(name = "q", required = false) String q,
 
 	@PostMapping("/admin/crawl")
 	public ResponseEntity<String> startCrawl() {
-		crawler.crawl(startUrl);
-		return new ResponseEntity<>("Crawling finished successfully", HttpStatus.OK);
+		try{
+			// create a new crawler to initialize the executor service
+			if (properties.getCrawler().equals("multithread")) {
+				this.crawler= new MultithreadCrawler(indexFileName);
+			}
+			crawler.crawl(startUrl);
+			return new ResponseEntity<>("Crawling finished successfully", HttpStatus.OK);
+		} catch (Exception e) {
+			// Log the error for debugging
+			e.printStackTrace();
+			return new ResponseEntity<>("Error during crawling: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@PostMapping("/admin/regenerate-flipped-index")
