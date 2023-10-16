@@ -33,9 +33,6 @@ public class IndexFlipper {
                         String[] newLine = new String[2];
                         newLine[0] = line[i];
                         newLine[1] = link;
-                        if(newLine[0] == "dvds") {
-                            System.out.println("found");
-                        }
                         lines.add(newLine);
                     }
                 }
