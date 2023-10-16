@@ -58,55 +58,70 @@ public class SimpleCrawler extends Crawler {
      * @return the set of lines to print on the index file
      */
     public Set<String[]> explore(String startUrl, Set<String[]> lines, Set<String> visited){
-        if (visited.contains(startUrl)) return lines;
-        visited.add(startUrl);
-        String html = getHTML(startUrl);
-        // count number of <p> tags
-        List<String> pTags = new ArrayList<>();
-        Pattern p = Pattern.compile("<p>(.*?)</p>", Pattern.DOTALL);
-        Matcher m = p.matcher(html);
-        while (m.find()){
-            String content = m.group(1).trim();
-            content = content.replaceAll("<a [^>]*>([^<]*)</a>", "$1");
-            pTags.add(content);
-        }
+        // Create a queue for BFS
+        LinkedList<String> queue = new LinkedList<>();
 
-        String[] line = new String[pTags.size() + 1];
-        // only get the last part of the url
-        line[0] = startUrl.substring(startUrl.lastIndexOf("/"));
+        // Add the starting URL to the queue
+        queue.add(startUrl);
 
-        for (int i = 0; i < pTags.size(); i++) {
-            line[i+1] = pTags.get(i);
-        }
+        // BFS algorithm
+        while (!queue.isEmpty()) {
+            String url = queue.poll();
 
-        // System.out.println(Arrays.toString(line));
+            // Check if URL has already been visited
+            if (visited.contains(url)) {
+                continue; // skip the already visited URL
+            }
+            visited.add(url);
 
-        lines.add(line);
+            // Retrieve and process the HTML content
+            String html = getHTML(url);
 
-        // find all the links in the page. Example <a href="609ada9fcd0d4297">609ada9fcd0d4297</a>
-        p = Pattern.compile("<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1", Pattern.DOTALL);
-        m = p.matcher(html);
-        while (m.find()){
-            String link = m.group(2);
+            // Count number of <p> tags and gather their contents
+            List<String> pTags = new ArrayList<>();
+            Pattern p = Pattern.compile("<p>(.*?)</p>", Pattern.DOTALL);
+            Matcher m = p.matcher(html);
+            while (m.find()){
+                String content = m.group(1).trim();
+                content = content.replaceAll("<a [^>]*>([^<]*)</a>", "$1");
+                pTags.add(content);
+            }
 
-            if (!link.startsWith("http"))
-                link = startUrl.substring(0, startUrl.lastIndexOf("/")) + "/" + link;
+            // Prepare a line for the current page
+            String[] line = new String[pTags.size() + 1];
+            line[0] = url.substring(url.lastIndexOf("/")); // Only get the last part of the URL
 
-            if (link.contains("https://api.interactions.ics.unisg.ch/hypermedia-environment/") == false)
-                continue;
+            for (int i = 0; i < pTags.size(); i++) {
+                line[i+1] = pTags.get(i);
+            }
 
-            if (link.startsWith("http")) {
-                // explore link and merge the result with lines
-                Set<String[]> newLines = explore(link, lines, visited);
-                // merge lines and newLines, but avoid duplicates
-                Set<String[]> mergedLines = new HashSet<>();
-                mergedLines.addAll(lines);
-                mergedLines.addAll(newLines);
-                lines = mergedLines;
+            // Add the prepared line to the set of lines
+            lines.add(line);
+
+            // Find all the links in the page
+            p = Pattern.compile("<a\\s+(?:[^>]*?\\s+)?href=([\"'])(.*?)\\1", Pattern.DOTALL);
+            m = p.matcher(html);
+            while (m.find()){
+                String link = m.group(2);
+
+                // Prepare absolute URL if necessary
+                if (!link.startsWith("http")) {
+                    link = url.substring(0, url.lastIndexOf("/")) + "/" + link;
+                }
+
+                // Skip unwanted URLs
+                if (!link.contains("https://api.interactions.ics.unisg.ch/hypermedia-environment/")) {
+                    continue;
+                }
+
+                // If the link is a proper URL and hasn't been visited yet, add it to the queue
+                if (link.startsWith("http") && !visited.contains(link)) {
+                    queue.add(link);
+                }
             }
         }
 
+        // Return the set of lines containing data gathered during the crawl
         return lines;
     }
-
 }
