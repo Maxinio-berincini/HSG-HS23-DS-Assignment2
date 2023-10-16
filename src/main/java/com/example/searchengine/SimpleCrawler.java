@@ -37,7 +37,6 @@ public class SimpleCrawler extends Crawler {
 
     private String getHTML(String url) {
         String content = "";
-        System.out.println(url);
         try {
             URLConnection connection =  new URL(url).openConnection();
             Scanner scanner = new Scanner(connection.getInputStream());
