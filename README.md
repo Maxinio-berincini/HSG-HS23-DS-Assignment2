@@ -47,6 +47,17 @@ chmod 755 gradlew
 
 ### Run the tests for the class SimpleCrawlerTest. You should have a sucessful build to pass the test.
 
+In this class, you should complete the files Crawler.java and SimpleCrawler.java. 
+
+The SimpleCrawler explores the full hypermedia environment by following hyperlinks (except those that lead outside of the hypermedia environment, 
+https://app.swaggerhub.com/apis-docs/interactions-hsg/mirocard-server/1.0.0 and https://app.swaggerhub.com/apis-docs/interactions-hsg/robots/1.0.0).
+
+When each URLs have been explored, the index should be generated and written on the index.csv file in /src/main/resources.
+
+The format of the index is defined in the Assignment sheet. For Windows user, the end of line is indicated by "\r\n", while it is indicated by "\n" on Linux and macOS.
+
+
+
 On Linux:
 
 ```bash
@@ -72,6 +83,12 @@ On Windows:
 ## Task 2
 
 ### Run the tests for the class IndexFlipperTest, and then SearcherTest. You should have a sucessful build to pass the test.
+
+In this task, you should first complete the file IndexFlipper.java (and pass the IndexFlipperTest) to generate the index_flipped.csv file from the index.csv file.
+
+The structure of the flipped index is indicated in the Assignment sheet.
+
+Afterwards, you have to complete the Searcher file to implement a program that looks for a keyword in the index_flipped.csv file and returns a list of URLs containing the keyword.
 
 On Linux:
 
@@ -113,6 +130,11 @@ You should first configure the file application.properties in src/main/resources
 To access the search engine, go to the URL: "http://localhost:{PORT}/", where PORT is the specified PORT.
 If the port is 80, you can just use: "http://localhost/".
 
+You will implement the search engine (class SearchEngine.java) using the Spring framework.
+Links to basic documentation about how to use Spring to create a Web server are indicated in the file HELP.md.
+In order to provide appropriate responses
+with the required status codes, you should use the class org.springframework.http.ResponseEntity provided by Spring.  The methods that you define in the SearchEngine class to implement the search and lucky operations should return objects of this class to be able to specify the appropriate status codes (and other information).
+
 On Linux:
 
 ```bash
@@ -142,6 +164,12 @@ On Windows:
 ## Task 4
 
 ### Run the tests for the class MultithreadCrawlerTest. You should have a sucessful build to pass the test.
+
+In this task, you should complete the class MultithreadCrawler. In this class, there are two inner classes defined.
+
+In the method run of the class CrawlerRunnable, you should define the processing of a single URL.  When a new URL is discovered that has not been processed before, a new CrawlerRunnable should be created and run inside the executorService (of class ThreadPoolTaskExecutor).
+
+In the method run of the class ObserveRunnable, you should determine when the crawling has been completed and then, print the index on the index.csv file.  This runnable should be run in its own thread, independent of the executorService.
 
 On Linux:
 

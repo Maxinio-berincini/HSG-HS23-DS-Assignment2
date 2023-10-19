@@ -26,14 +26,16 @@
             "description": "The keyword to look for"
       "responses":
         200:
-          "description": "Successful response with search results"
+          "description": "Successful response with search results."
           "content":
             "text/html":
               "schema":
-                "$ref": '#/components/schemas/MainPage'
+                "$ref": '#/components/schemas/ResultsPage'
             "application/json":
               "schema":
                 "$ref": '#/components/schemas/UrlArray'
+        400:
+          "description": "This response is returned when the request is missing the query string parameter."
   "/lucky":
     "get":
       "summary": "Get best page"
@@ -43,24 +45,37 @@
           "name": "q"
           "schema":
             "type": "string"
-            "description": "The url to start crawling"
+            "description": "The keyword to look for"
       "responses":
         200:
-          "description": "Successful response"
+          "description": "Returns the URL of a page containing the keyword. This response is returned when the client requests an application/json representation."
           "content":
-            "text/html":
-              "schema":
-                "$ref": '#/components/schemas/MainPage'
             "application/json":
               "schema":
                 "$ref": '#/components/schemas/Url'
+        302:
+          "description": "Redirects to a Web page containing the keyword. This response is returned when the client requests a text/html representation."
+          "headers":
+            "Location":
+              "schema":
+                "$ref": '#/components/schemas/Url'
+        400:
+          "description": "This response is returned when the request is missing the query string parameter."
+        404:
+          "description": "This response is returned when no page is found for the given keyword."
 
 "components":
   "schemas":
     "MainPage":
       "type": "string"
+      "description": "The main HTML page that you have to create."
+    "ResultsPage":
+      "type": "string"
+      "description": "A HTML page containing the same information as the main page with additional links to the search results."
     "Url":
       "type": "string"
+      "format": "uri"
+      "example": "https://api.interactions.ics.unisg.ch/hypermedia-environment/cc2247b79ac48af0"
     "UrlArray":
       "type": "array"
       "items":
