@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileReader;
 import java.io.IOException;
@@ -168,21 +169,25 @@ public String search(@RequestParam(name = "q", required = false) String q,
 	}
 
 	@GetMapping("/lucky")
-	public void lucky(@RequestParam(name = "q") String q, HttpServletResponse response) {
+	public ResponseEntity<String> lucky(@RequestParam(name = "q") String q, HttpServletRequest request, HttpServletResponse response) {
+		// check if the query is empty or null
+		if (q == null || q.isEmpty()) {
+			return new ResponseEntity<>("Missing query", HttpStatus.BAD_REQUEST);
+		}
+
 		// get first result and redirect
 		List<String> urls = searcher.search(q, flippedIndexFileName);
+
+		String accept = request.getHeader("Accept");
 		if (urls.size() > 0) {
-			response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
-			response.setHeader("Location", urls.get(0));
-		} else {
-			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-			try {
-				response.getWriter().write("Not Found");
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			if (accept != null) {
+				response.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
+				response.setHeader("Location", urls.get(0));
+				return null;
 			}
 		}
-	}
+			return new ResponseEntity<>("Not Found", HttpStatus.NOT_FOUND);
+    }
 
 	@PostMapping("/admin/crawl")
 	public ResponseEntity<String> startCrawl() {
@@ -194,40 +199,76 @@ public String search(@RequestParam(name = "q", required = false) String q,
 			crawler.crawl(startUrl);
 			return new ResponseEntity<>("Crawling finished successfully", HttpStatus.OK);
 		} catch (Exception e) {
-			// Log the error for debugging
-			e.printStackTrace();
 			return new ResponseEntity<>("Error during crawling: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@PostMapping("/admin/regenerate-flipped-index")
 	public ResponseEntity<String> regenerateFlippedIndex() {
-		indexFlipper.flipIndex(indexFileName, flippedIndexFileName);
-		return new ResponseEntity<>("Flipped index regenerated successfully", HttpStatus.OK);
+		try {
+			indexFlipper.flipIndex(indexFileName, flippedIndexFileName);
+			return new ResponseEntity<>("Flipped index regenerated successfully", HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Error during flipping: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@PostMapping("/admin/delete-url")
 	public ResponseEntity<String> deleteUrl(@RequestParam String url) {
-		crawler.deleteUrlFromIndex(url);
-		return new ResponseEntity<>("URL deleted successfully", HttpStatus.OK);
+		if(url == null || url.isEmpty()) {
+			return new ResponseEntity<>("Missing url", HttpStatus.BAD_REQUEST);
+		} else if (!url.startsWith("/")) {
+			return new ResponseEntity<>("Url must start with /", HttpStatus.BAD_REQUEST);
+		}
+		try {
+			crawler.deleteUrlFromIndex(url);
+			return new ResponseEntity<>("URL deleted successfully", HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Error during delete: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 
 	@PostMapping("/admin/update-url")
 	public ResponseEntity<String> updateUrl(@RequestParam String url, @RequestParam String keywords) {
-		List<String> keywordList = Arrays.asList(keywords.split(","));
-		crawler.updateUrlInIndex(url, keywordList);
-		return new ResponseEntity<>("URL updated successfully", HttpStatus.OK);
+		if(url == null || url.isEmpty()) {
+			return new ResponseEntity<>("Missing url", HttpStatus.BAD_REQUEST);
+		} else if (!url.startsWith("/")) {
+			return new ResponseEntity<>("Url must start with /", HttpStatus.BAD_REQUEST);
+		}
+		try {
+			List<String> keywordList = Arrays.asList(keywords.split(","));
+			crawler.updateUrlInIndex(url, keywordList);
+			return new ResponseEntity<>("URL updated successfully", HttpStatus.OK);
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Error during update: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 	@GetMapping("/admin/load-keywords")
 	public ResponseEntity<String> loadKeywordsForUrl(@RequestParam String url) {
-		List<String> keywords = crawler.getKeywordsForUrl(url);
-		if (keywords != null) {
-			return new ResponseEntity<>(String.join(",", keywords), HttpStatus.OK);
-		} else {
-			return new ResponseEntity<>("URL not found", HttpStatus.NOT_FOUND);
+		if(url == null || url.isEmpty()) {
+			return new ResponseEntity<>("Missing url", HttpStatus.BAD_REQUEST);
+		} else if (!url.startsWith("/")) {
+			return new ResponseEntity<>("Url must start with /", HttpStatus.BAD_REQUEST);
 		}
+		try {
+			List<String> keywords = crawler.getKeywordsForUrl(url);
+			if (keywords != null) {
+				return new ResponseEntity<>(String.join(",", keywords), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("URL not found", HttpStatus.NOT_FOUND);
+			}
+		}
+		catch (Exception e) {
+			return new ResponseEntity<>("Error during loading: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
 	}
 
 }

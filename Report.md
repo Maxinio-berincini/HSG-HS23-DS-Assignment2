@@ -47,9 +47,16 @@ Assignment 2
 > - /admin/update-url
 >   - updates a given url with the given keywords
 > 
+> We grouped the endpoints into a /admin path, to make a structure that could be easily extended, without losing overview.
+> 
 > We chose the POST HTTP Method for actions that modify the data and GET for actions that retrieve data.
 > 
 > We also implemented messages based on the response Code from each action.
+> Crawl and regenerate flipped index only have a success and a fail message, as they do not require any input.
+> Delete url and update url have a success and a fail message, as well as a message for invalid input.
+> Load url has a message for url not found in addition to the other messages.
+>
+> We also implemented the admin interface into the main page of our search engine.
 
 # Task 4
 
