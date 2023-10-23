@@ -153,6 +153,12 @@
               "text/plain":
                 "schema":
                   "type": "string"
+          404:
+            "description": "URL not found in the index"
+            "content":
+              "text/plain":
+                "schema":
+                  "type": "string"
           500:
             "description": "Error during the update"
             "content":

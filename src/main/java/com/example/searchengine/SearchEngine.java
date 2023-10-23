@@ -241,8 +241,11 @@ public String search(@RequestParam(name = "q", required = false) String q,
 		}
 		try {
 			List<String> keywordList = Arrays.asList(keywords.split(","));
-			crawler.updateUrlInIndex(url, keywordList);
+			if (crawler.updateUrlInIndex(url, keywordList)){
 			return new ResponseEntity<>("URL updated successfully", HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>("URL not found in the index", HttpStatus.NOT_FOUND);
+			}
 		}
 		catch (Exception e) {
 			return new ResponseEntity<>("Error during update: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -69,7 +69,7 @@ public abstract class Crawler {
         }
     }
 
-    public void updateUrlInIndex(String urlToUpdate, List<String> newKeywords) {
+    public boolean updateUrlInIndex(String urlToUpdate, List<String> newKeywords) {
         List<String> updatedLines = new ArrayList<>();
         boolean updated = false;
 
@@ -83,12 +83,10 @@ public abstract class Crawler {
                     updatedLines.add(line);
                 }
             }
-
-            if (!updated) {
-                updatedLines.add(urlToUpdate + "," + String.join(",", newKeywords));
-            }
-
             Files.write(path, updatedLines);
+
+            return updated;
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
