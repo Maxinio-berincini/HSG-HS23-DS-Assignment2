@@ -15,19 +15,19 @@ public class SearchEngineProperties {
     @Value("${crawler}")
     private String crawler;
 
-    public boolean getCrawl(){
+    public boolean getCrawl() {
         return crawl;
     }
 
-    public void setCrawl(boolean crawl){
+    public void setCrawl(boolean crawl) {
         this.crawl = crawl;
     }
 
-    public String getCrawler(){
+    public String getCrawler() {
         return crawler;
     }
 
-    public void setCrawler(String crawler){
+    public void setCrawler(String crawler) {
         this.crawler = crawler;
     }
 }

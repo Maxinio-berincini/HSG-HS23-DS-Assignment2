@@ -5,13 +5,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class MultithreadCrawler extends Crawler {
 

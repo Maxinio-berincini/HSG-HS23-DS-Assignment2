@@ -1,10 +1,6 @@
 package com.example.searchengine;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 
 import java.io.IOException;
 import java.net.URL;
@@ -16,13 +12,12 @@ import java.util.List;
 
 public abstract class Crawler {
 
-     final String indexFileName;
-    private Path path;
+    final String indexFileName;
+    private final Path path;
 
-    private String baseUrl = "https://api.interactions.ics.unisg.ch/hypermedia-environment/";
+    private final String baseUrl = "https://api.interactions.ics.unisg.ch/hypermedia-environment/";
 
     /**
-     *
      * @param indexFileName the name of the file that is used as index.
      */
     protected Crawler(String indexFileName) {
@@ -31,12 +26,11 @@ public abstract class Crawler {
     }
 
     /**
-     *
      * @param url the url where the crawling starts
      */
     public abstract void crawl(String url);
 
-    public  List<List<String>> getInfo(String urlString){
+    public List<List<String>> getInfo(String urlString) {
         List<String> keywords = new ArrayList<>();
         List<String> hyperlinks = new ArrayList<>();
         List<List<String>> returnList = new ArrayList<>();
@@ -45,7 +39,7 @@ public abstract class Crawler {
             Elements elements; //TODO: initialize elements based on the webpage at the given url.
             //TODO: Use elements to put the keywords in the webpage in the list keywords.
             //TODO: Use elements to the hyperlinks to other pages in the environment in the list hyperlinks.
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         returnList.add(keywords);
@@ -107,7 +101,6 @@ public abstract class Crawler {
         }
         return null;
     }
-
 
 
 }

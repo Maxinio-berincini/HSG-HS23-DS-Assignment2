@@ -7,10 +7,15 @@ import org.springframework.stereotype.Component;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
+
 @Component
 public class IndexFlipper {
 
-    public void flipIndex(String indexFileName, String flippedIndexFileName){
+    public static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
+        return set.stream().filter(array -> array[0].equals(element)).findFirst();
+    }
+
+    public void flipIndex(String indexFileName, String flippedIndexFileName) {
         try {
             CSVReader csvReader = new CSVReader(new FileReader(indexFileName));
             List<String[]> csvLines = csvReader.readAll();
@@ -38,20 +43,16 @@ public class IndexFlipper {
                 }
             }
 
-            CSVWriter writer = new CSVWriter(new FileWriter(flippedIndexFileName),',', CSVWriter.NO_QUOTE_CHARACTER,' ',"\r\n");
+            CSVWriter writer = new CSVWriter(new FileWriter(flippedIndexFileName), ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n");
             for (String[] line : lines) {
                 writer.writeNext(line);
             }
             writer.close();
 
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-    }
-
-    public static Optional<String[]> findArrayByFirstElement(Set<String[]> set, String element) {
-        return set.stream().filter(array -> array[0].equals(element)).findFirst();
     }
 
 }
